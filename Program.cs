@@ -1,4 +1,5 @@
 using System.Text.Json;
+using System.Text.Json.Nodes;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Formatters;
 
@@ -9,16 +10,18 @@ builder.Services.Configure<JsonSerializerOptions>(o => o.PropertyNameCaseInsensi
 
 var app = builder.Build();
 var UsersList = new List<Users>();
-
+var ProfilesList = new List<UserProfile>();
 //registration
 app.MapPost("/users", async (HttpContext ctx, [FromBody] UserRequestEnv<UserRequest> req) =>
 {   
     var exist = UsersList.FirstOrDefault(x => (x.UserName == req.UserObj.UserName || x.Email==req.UserObj.Email));
     if (exist == null)
     {
+        
         var resp = new Users(req.UserObj.UserName, req.UserObj.Email, req.UserObj.Password, $"{Guid.NewGuid()}", "", "");
-
+        
         UsersList.Add(resp);
+        ProfilesList.Add(new UserProfile(req.UserObj.UserName, req.UserObj.Email, 0, 0));
         await ctx.Response.WriteAsJsonAsync(new UserRequestEnv<Users>(resp));
     }
     else
@@ -75,6 +78,65 @@ app.MapPut("/user", async (HttpContext ctx, [FromBody] UserRequestEnv<UserReques
 
 });
 
+app.MapGet("profiles/{username}", (String username) =>
+{
+    var exist = ProfilesList.FirstOrDefault(x => x.UserName == username);
+    if(exist != null)
+    {   
+        return new UserRequestEnv<UserProfile>(exist);
+    }
+    else
+    {
+        return new UserRequestEnv<UserProfile>(null);
+    }
+});
+
+
+app.MapPost("profile/{username}/follow", async (HttpContext ctx, [FromBody] UserRequestEnv<UserRequest> req, String username) =>
+{
+    var email = req.UserObj.Email;
+    if (email != null)
+    {   
+        var user = ProfilesList.FirstOrDefault(x => x.Email == email);
+        if (user != null)
+        {
+            ProfilesList.Remove(user);
+            var resp = new UserProfile(user.UserName, user.Email, user.Followers + 1, user.Following);
+            ProfilesList.Add(resp);
+            
+            await ctx.Response.WriteAsJsonAsync<UserProfile>(resp);
+            
+        }
+
+    }
+    await ctx.Response.WriteAsync("this profile is not found");
+
+
+});
+
+
+app.MapDelete("profile/{username}/follow", async (HttpContext ctx, String username) =>
+{
+    
+    var user = ProfilesList.FirstOrDefault(x => x.UserName == username);
+    if (user != null)
+    {
+        ProfilesList.Remove(user);
+        var resp = new UserProfile(user.UserName, user.Email, user.Followers - 1, user.Following);
+        ProfilesList.Add(resp);
+
+        await ctx.Response.WriteAsJsonAsync<UserProfile>(resp);
+
+    }
+
+    await ctx.Response.WriteAsync("this profile is not found");
+
+
+});
+
+
+
+
 app.MapControllers();
 app.Run("http://localhost:5500");
 
@@ -83,3 +145,5 @@ public record UserRequest(string UserName, string Email, string Password);
 
 public record UserRequestEnv<T>(T UserObj);
 record Users(string? UserName, string? Email, string? Password, string? Token, string? Bio, string? Image);
+
+record UserProfile(string UserName, string Email, int Followers, int Following);
