@@ -1,8 +1,10 @@
 {
   "version": 2,
-  "dgSpecHash": "VpH+wcw3IJRVyjT9ynrZ6nESUc1E/UZjTQJoadkuqGCoIHMiRo/CawQoqGpu6ioGxgDjdo9RUz7qTcvXjVz1aQ==",
+  "dgSpecHash": "tbylxbHbcex5TeMQ/0qaMOLK0Z3lufjceFnTg35Hn9vuDOmYMCXVKv/MEDQXVS6l8vWUAQXfXI/7uR0W9mDtwg==",
   "success": true,
   "projectFilePath": "C:\\Users\\od7mo\\source\\repos\\AUTH-TEST1\\AUTH-TEST1\\AUTH-TEST1.csproj",
-  "expectedPackageFiles": [],
+  "expectedPackageFiles": [
+    "C:\\Users\\od7mo\\.nuget\\packages\\fluentvalidation\\11.2.2\\fluentvalidation.11.2.2.nupkg.sha512"
+  ],
   "logs": []
 }

@@ -1,5 +1,7 @@
+using System.Runtime.CompilerServices;
 using System.Text.Json;
 using System.Text.Json.Nodes;
+using AUTH_TEST1;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Formatters;
 
@@ -9,8 +11,29 @@ builder.Services.AddControllers();
 builder.Services.Configure<JsonSerializerOptions>(o => o.PropertyNameCaseInsensitive = true);
 
 var app = builder.Build();
-var UsersList = new List<Users>();
-var ProfilesList = new List<UserProfile>();
+//var UsersList = new List<Users>();
+//var ProfilesList = new List<UserProfile>();
+
+
+
+
+
+app.Use(async (context, next) =>
+{
+    if (context.Request.Headers.Authorization == string.Empty)
+    {
+        throw new Exception("You must be login to do this process\n");
+    }
+    else
+    {
+        await next(context);
+    }
+});
+
+
+
+
+/*
 //registration
 app.MapPost("/users", async (HttpContext ctx, [FromBody] UserRequestEnv<UserRequest> req) =>
 {   
@@ -134,16 +157,18 @@ app.MapDelete("profile/{username}/follow", async (HttpContext ctx, String userna
 
 });
 
-
+*/
 
 
 app.MapControllers();
 app.Run("http://localhost:5500");
 
-
+/*
 public record UserRequest(string UserName, string Email, string Password);
 
 public record UserRequestEnv<T>(T UserObj);
 record Users(string? UserName, string? Email, string? Password, string? Token, string? Bio, string? Image);
 
 record UserProfile(string UserName, string Email, int Followers, int Following);
+
+*/
